@@ -1,4 +1,4 @@
-package tech.reivax.cryptotracker.util
+package tech.reivax.cryptotracker.core.domain.util
 
 typealias DomainError = Error
 

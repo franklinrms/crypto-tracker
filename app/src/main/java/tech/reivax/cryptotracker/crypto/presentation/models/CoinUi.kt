@@ -3,7 +3,7 @@ package tech.reivax.cryptotracker.crypto.presentation.models
 import android.icu.text.NumberFormat
 import androidx.annotation.DrawableRes
 import tech.reivax.cryptotracker.crypto.domain.Coin
-import tech.reivax.cryptotracker.util.getDrawableIdForCoin
+import tech.reivax.cryptotracker.core.presentation.util.getDrawableIdForCoin
 import java.util.Locale
 
 data class CoinUi(
