@@ -13,7 +13,9 @@ import kotlinx.coroutines.launch
 import tech.reivax.cryptotracker.core.domain.util.onError
 import tech.reivax.cryptotracker.core.domain.util.onSuccess
 import tech.reivax.cryptotracker.crypto.domain.CoinDataSource
+import tech.reivax.cryptotracker.crypto.presentation.models.CoinUi
 import tech.reivax.cryptotracker.crypto.presentation.models.toCoinUi
+import java.time.ZonedDateTime
 
 class CoinListViewModel(
     private val coinDataSource: CoinDataSource
@@ -34,10 +36,26 @@ class CoinListViewModel(
     fun onAction(action: CoinListAction) {
         when(action) {
             is CoinListAction.OnCoinClick -> {
-                _state.update { it.copy(
-                    selectedCoin = action.coinUi
-                ) }
+                selectCoin(action.coinUi)
             }
+        }
+    }
+
+    private fun selectCoin(coinUi: CoinUi) {
+        _state.update { it.copy(selectedCoin = coinUi) }
+        viewModelScope.launch {
+            coinDataSource
+                .getCoinHistory(
+                    coinId = coinUi.id,
+                    start = ZonedDateTime.now().minusDays(5),
+                    end = ZonedDateTime.now()
+                )
+                .onSuccess { history ->
+                    println(history)
+                }
+                .onError { error ->
+                    _events.send(CoinListEvent.Error(error))
+                }
         }
     }
 
