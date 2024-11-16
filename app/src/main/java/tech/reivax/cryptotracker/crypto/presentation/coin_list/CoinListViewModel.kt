@@ -13,9 +13,11 @@ import kotlinx.coroutines.launch
 import tech.reivax.cryptotracker.core.domain.util.onError
 import tech.reivax.cryptotracker.core.domain.util.onSuccess
 import tech.reivax.cryptotracker.crypto.domain.CoinDataSource
+import tech.reivax.cryptotracker.crypto.presentation.coin_detail.DataPoint
 import tech.reivax.cryptotracker.crypto.presentation.models.CoinUi
 import tech.reivax.cryptotracker.crypto.presentation.models.toCoinUi
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class CoinListViewModel(
     private val coinDataSource: CoinDataSource
@@ -51,7 +53,24 @@ class CoinListViewModel(
                     end = ZonedDateTime.now()
                 )
                 .onSuccess { history ->
-                    println(history)
+                    val dataPoints = history
+                        .sortedBy { it.dateTime }
+                        .map {
+                            DataPoint(
+                                x = it.dateTime.hour.toFloat(),
+                                y = it.priceUsd.toFloat(),
+                                xLabel = DateTimeFormatter
+                                    .ofPattern("ha\nM/d")
+                                    .format(it.dateTime)
+                            )
+                        }
+                    _state.update {
+                        it.copy(
+                            selectedCoin = it.selectedCoin?.copy(
+                                coinPriceHistory = dataPoints
+                            )
+                        )
+                    }
                 }
                 .onError { error ->
                     _events.send(CoinListEvent.Error(error))
